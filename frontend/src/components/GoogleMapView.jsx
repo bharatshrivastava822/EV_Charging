@@ -42,20 +42,32 @@ export default function GoogleMapView({
   const mapRef = useRef(null);
   const markersRef = useRef([]);
   const routeLayerRef = useRef([]);
-  const [mapError, setMapError] = useState(false);
+  const [mapError, setMapError] = useState(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
-    // Custom auth failure handler
-    window.gm_authFailure = () => {
-      setMapError(true);
-    };
-
+    // Detect API key presence safely without logging value
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || import.meta.env.VITE_MAPS_API_KEY;
+
     if (!apiKey) {
-      setMapError(true);
+      setMapError({
+        type: 'MISSING_KEY',
+        title: 'Map Configuration Missing',
+        message: 'The Google Maps API key (VITE_GOOGLE_MAPS_API_KEY) is not set in this environment.',
+        action: 'Add VITE_GOOGLE_MAPS_API_KEY in your deployment environment variables (e.g., Vercel / Netlify settings) and trigger a new build.'
+      });
       return;
     }
+
+    // Google Maps authentication failure handler
+    window.gm_authFailure = () => {
+      setMapError({
+        type: 'AUTH_FAILURE',
+        title: 'Google Maps Authentication Failed',
+        message: 'Google rejected the API key or domain referrer for this site.',
+        action: 'Check Google Cloud Console: 1) Ensure "Maps JavaScript API" is enabled, 2) Add this site\'s domain to HTTP Referrer restrictions (e.g., https://*.vercel.app/*).'
+      });
+    };
 
     let isMounted = true;
 
@@ -86,9 +98,32 @@ export default function GoogleMapView({
         mapRef.current = map;
         setMapLoaded(true);
       } catch (e) {
-        console.error("Google Maps failed to load", e);
+        console.error("Google Maps initialization error:", e?.message || e);
         if (isMounted) {
-          setMapError(true);
+          const errMsg = e?.message || '';
+          let errorType = 'LOAD_ERROR';
+          let customTitle = 'Map Unavailable';
+          let customMsg = 'Unable to initialize Google Maps in this browser session.';
+          let customAction = 'Verify your internet connection and ensure Maps JavaScript API is activated in Google Cloud Console.';
+
+          if (errMsg.includes('RefererNotAllowed') || errMsg.includes('Referrer')) {
+            errorType = 'REFERRER_ERROR';
+            customTitle = 'Domain Not Authorized';
+            customMsg = 'This website domain is not in the allowed HTTP referrers list for this API key.';
+            customAction = 'In Google Cloud Console > APIs & Credentials, add your deployment URL (e.g., https://*.vercel.app/*) to Authorized Domains.';
+          } else if (errMsg.includes('ApiNotActivated')) {
+            errorType = 'API_NOT_ACTIVATED';
+            customTitle = 'Maps JavaScript API Disabled';
+            customMsg = 'The Maps JavaScript API has not been enabled on the associated Google Cloud project.';
+            customAction = 'Enable "Maps JavaScript API" in the Google Cloud Console library.';
+          }
+
+          setMapError({
+            type: errorType,
+            title: customTitle,
+            message: customMsg,
+            action: customAction
+          });
         }
       }
     }
@@ -220,53 +255,91 @@ export default function GoogleMapView({
     return (
       <div className="dark-map-outer-container map-fallback-error-state">
         <div className="fallback-content">
-          <AlertTriangle className="error-icon" size={48} />
-          <h3>Map unavailable</h3>
-          <p>We're unable to load the live map right now. Please check your map service configuration.</p>
-          <button className="fallback-retry-btn" onClick={() => window.location.reload()}>Retry</button>
+          <AlertTriangle className="error-icon" size={44} />
+          <h3>{mapError.title || 'Map Unavailable'}</h3>
+          <p className="fallback-desc">{mapError.message || "We're unable to load the live map right now."}</p>
+          {mapError.action && (
+            <div className="fallback-action-box">
+              <span className="action-tag">ACTION REQUIRED</span>
+              <p className="action-text">{mapError.action}</p>
+            </div>
+          )}
+          <button className="fallback-retry-btn" onClick={() => window.location.reload()}>
+            Retry Connection
+          </button>
         </div>
         <style>{`
           .map-fallback-error-state {
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #050505;
+            background-color: #0d0f0e;
             min-height: 520px;
             border-radius: var(--radius-md);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
           }
           .fallback-content {
             text-align: center;
             color: #888;
-            max-width: 400px;
+            max-width: 460px;
             padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
           }
           .error-icon {
-            color: #ff3366;
-            margin-bottom: 1rem;
+            color: #FFB800;
+            margin-bottom: 0.75rem;
           }
           .fallback-content h3 {
             color: #fff;
             margin-bottom: 0.5rem;
-            font-size: 1.25rem;
+            font-size: 1.15rem;
+            font-weight: 700;
           }
-          .fallback-content p {
-            margin-bottom: 1.5rem;
+          .fallback-desc {
+            margin-bottom: 1rem;
             line-height: 1.5;
-            font-size: 0.95rem;
+            font-size: 0.875rem;
+            color: #aaa;
+          }
+          .fallback-action-box {
+            background: rgba(184, 255, 0, 0.04);
+            border: 1px solid rgba(184, 255, 0, 0.2);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.25rem;
+            text-align: left;
+            width: 100%;
+          }
+          .action-tag {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: #B8FF00;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+          }
+          .action-text {
+            font-size: 0.8rem;
+            color: #ddd;
+            line-height: 1.4;
+            margin: 0;
           }
           .fallback-retry-btn {
-            background: #111;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 0.5rem 1.5rem;
-            border-radius: 4px;
+            background: #181c19;
+            border: 1px solid rgba(184, 255, 0, 0.3);
+            color: #B8FF00;
+            font-weight: 600;
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 0.85rem;
           }
           .fallback-retry-btn:hover {
-            background: #222;
-            border-color: #555;
+            background: #B8FF00;
+            color: #000;
           }
         `}</style>
       </div>
