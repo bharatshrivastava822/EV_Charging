@@ -69,9 +69,12 @@ The application uses an intentional dark EV mobility aesthetic:
 
 ### Frontend (`frontend/.env`)
 ```properties
-VITE_MAPS_API_KEY=AIzaSyAOVYRIgupAurZup5y1PRh8Ismb1A3lLao
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 VITE_API_BASE_URL=/api
 ```
+
+> **Production Deployment Note (Vercel / Netlify / Render)**:
+> In your hosting platform settings, add `VITE_GOOGLE_MAPS_API_KEY` under **Environment Variables** for the **Production** environment, then trigger a redeploy so Vite bakes the key into the production bundle.
 
 ### Backend (`backend/src/main/resources/application.properties`)
 ```properties
