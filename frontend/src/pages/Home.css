@@ -1,0 +1,419 @@
+/* Home Page Synthesis Stylesheet */
+
+.home-container-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-top: 1.5rem;
+}
+
+/* Reference 2 Enterprise Hero Container */
+.enterprise-hero-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 2rem 2.25rem;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.hero-tags-line {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.initiative-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid var(--primary-border);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.prototype-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--warning);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.hero-main-title {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.hero-sub-text {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  max-width: 780px;
+  line-height: 1.55;
+  margin-bottom: 1.5rem;
+}
+
+.hero-action-buttons-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Quick Stats Bar from Reference 1 */
+.stats-and-search-strip {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.stats-blocks-trio {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+}
+
+.stat-pill-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.stat-pill-box.highlight-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(184, 255, 0, 0.25);
+}
+
+.stat-pill-box.highlight-primary .stat-title {
+  color: rgba(5, 5, 5, 0.85);
+  font-weight: 700;
+}
+
+.stat-pill-box.highlight-primary .stat-num {
+  color: var(--primary-contrast);
+}
+
+.stat-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+.stat-num {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-top: 0.25rem;
+  line-height: 1;
+}
+
+/* Search and Filters */
+.search-filter-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.search-input-box {
+  position: relative;
+  width: 100%;
+}
+
+.search-input-box input {
+  width: 100%;
+  background: var(--secondary-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.65rem 1rem 0.65rem 2.6rem;
+  color: #FFFFFF;
+  font-size: 0.875rem;
+  outline: none;
+  transition: var(--transition);
+}
+
+.search-input-box input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.search-icon-pos {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.filter-chips-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  overflow-x: auto;
+}
+
+.filter-chip-btn {
+  background: var(--secondary-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.85rem;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.filter-chip-btn:hover {
+  border-color: var(--primary-border);
+  color: #FFFFFF;
+}
+
+.filter-chip-btn.active {
+  background: var(--primary);
+  color: var(--primary-contrast);
+  border-color: var(--primary);
+}
+
+/* Map First Split View */
+.map-first-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 1.25rem;
+  min-height: 580px;
+}
+
+.map-wrapper-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  height: 100%;
+  min-height: 520px;
+  background-color: #0A0E12;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Reference 1 Nearest Station Side Card */
+.side-stations-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  height: 100%;
+  max-height: 620px;
+  overflow-y: auto;
+  gap: 1rem;
+}
+
+.panel-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-heading {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.station-spotlight-card {
+  background: var(--secondary-bg);
+  border: 1.5px solid var(--primary-border);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 0 16px rgba(184, 255, 0, 0.08);
+}
+
+.spotlight-top-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.power-icon-green-square {
+  width: 44px;
+  height: 44px;
+  background: var(--primary);
+  color: var(--primary-contrast);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spotlight-info-column {
+  flex: 1;
+}
+
+.spotlight-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.2;
+}
+
+.spotlight-meta-sub {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.2rem;
+}
+
+.spotlight-pricing-pill {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.rate-amount {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+}
+
+.rate-unit {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #FCD34D;
+  margin-top: 0.2rem;
+}
+
+/* Connectors mini grid in panel */
+.spotlight-connectors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.85rem;
+}
+
+.connector-chip-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+/* Reference 2 Core Services Cards */
+.core-services-section {
+  padding-top: 1rem;
+}
+
+.services-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.service-module-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: var(--transition);
+}
+
+.service-module-card:hover {
+  border-color: var(--primary-border);
+  transform: translateY(-2px);
+}
+
+.service-tag-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--primary);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+}
+
+.service-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 0.5rem;
+}
+
+.service-desc {
+  font-size: 0.825rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+}
+
+.service-link-action {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none !important;
+}
+.service-link-action:hover {
+  color: var(--primary-hover);
+}
+
+@media (max-width: 1024px) {
+  .map-first-layout-grid {
+    grid-template-columns: 1fr;
+  }
+  .stats-and-search-strip {
+    grid-template-columns: 1fr;
+  }
+  .services-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
