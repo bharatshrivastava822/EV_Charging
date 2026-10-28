@@ -24,6 +24,7 @@ import AdminBookings from './pages/admin/AdminBookings';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminSlots from './pages/admin/AdminSlots';
 import AdminApprovals from './pages/admin/AdminApprovals';
+import AdminMaintenance from './pages/admin/AdminMaintenance';
 
 import OperatorLayout from './layouts/OperatorLayout';
 import OperatorDashboard from './pages/operator/OperatorDashboard';
@@ -31,6 +32,7 @@ import OperatorStations from './pages/operator/OperatorStations';
 import OperatorSlots from './pages/operator/OperatorSlots';
 import OperatorBookings from './pages/operator/OperatorBookings';
 import OperatorStatus from './pages/operator/OperatorStatus';
+import OperatorMaintenance from './pages/operator/OperatorMaintenance';
 
 function UserLayout({ children }) {
   return (
@@ -72,6 +74,7 @@ export default function App() {
               <Route path="stations" element={<OperatorStations />} />
               <Route path="slots" element={<OperatorSlots />} />
               <Route path="bookings" element={<OperatorBookings />} />
+              <Route path="maintenance" element={<OperatorMaintenance />} />
             </Route>
 
             {/* Admin enterprise routes */}
@@ -82,6 +85,7 @@ export default function App() {
               <Route path="bookings" element={<AdminBookings />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="slots" element={<AdminSlots />} />
+              <Route path="maintenance" element={<AdminMaintenance />} />
             </Route>
 
             {/* Catch-all */}

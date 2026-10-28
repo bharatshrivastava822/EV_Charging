@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { MapPin, Clock, Zap, ArrowLeft, ChevronRight, ShieldCheck, Check, CalendarCheck, CheckCircle2, BatteryCharging } from 'lucide-react';
+import { MapPin, Clock, Zap, ArrowLeft, ChevronRight, ShieldCheck, Check, CalendarCheck, CheckCircle2, BatteryCharging, Calculator, Star, MessageSquare } from 'lucide-react';
 import { stationService } from '../services/stationService';
 import { bookingService } from '../services/bookingService';
+import { featureService } from '../services/featureService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { LoadingState, ErrorState } from '../components/UI';
 import SlotGrid from '../components/SlotGrid';
+import CostEstimatorModal from '../components/CostEstimatorModal';
 
 const CHARGER_LABELS = { CCS2: 'CCS2', CHAdeMO: 'CHAdeMO', TYPE2: 'Type 2', AC: 'AC', DC_FAST: 'DC Fast' };
 
@@ -36,6 +38,12 @@ export default function StationDetail() {
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [booking, setBooking] = useState(false);
+  const [estimatorOpen, setEstimatorOpen] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [newRating, setNewRating] = useState(5);
+  const [newComment, setNewComment] = useState('');
+  const [newVehicle, setNewVehicle] = useState('Tata Nexon EV');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -44,6 +52,14 @@ export default function StationDetail() {
         setStation(data);
         const firstActive = (data.chargers || []).find(c => c.status === 'ACTIVE');
         if (firstActive) setSelectedCharger(firstActive);
+        
+        // Fetch reviews
+        try {
+          const revs = await featureService.getReviews(id);
+          setReviews(revs);
+        } catch (e) {
+          // ignore review fetch failure
+        }
       } catch {
         setError('Unable to load station details.');
       } finally {
@@ -52,6 +68,30 @@ export default function StationDetail() {
     };
     fetch();
   }, [id]);
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      addToast('Please sign in to post a review.', 'warning');
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      const created = await featureService.submitReview({
+        stationId: Number(id),
+        rating: Number(newRating),
+        comment: newComment,
+        vehicleModel: newVehicle
+      });
+      setReviews([created, ...reviews]);
+      setNewComment('');
+      addToast('Thank you for rating this station!', 'success');
+    } catch (err) {
+      addToast(err.response?.data?.message || 'Failed to submit review.', 'error');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   useEffect(() => {
     if (!selectedCharger || !selectedDate) return;
@@ -257,6 +297,97 @@ export default function StationDetail() {
               </div>
             )}
           </div>
+
+          {/* Driver Community Reviews & Feedback */}
+          <div className="card" style={{ marginTop: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Star size={18} color="var(--primary)" fill="currentColor" />
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+                  Driver Community Reviews ({reviews.length})
+                </h3>
+              </div>
+              <span style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 700 }}>
+                ★ {station.rating?.toFixed(1) || '4.8'} / 5.0
+              </span>
+            </div>
+
+            {/* Submit review */}
+            <form onSubmit={handleReviewSubmit} style={{ background: 'var(--surface-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem', marginBottom: '1.5rem' }}>
+              <div style={{ fontSize: '0.825rem', fontWeight: 700, color: '#FFFFFF', marginBottom: '0.75rem' }}>
+                Leave Driver Feedback & Rate This Hub
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <div>
+                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Rating</label>
+                  <select className="form-control" value={newRating} onChange={e => setNewRating(e.target.value)}>
+                    <option value={5}>⭐⭐⭐⭐⭐ (5/5)</option>
+                    <option value={4}>⭐⭐⭐⭐ (4/5)</option>
+                    <option value={3}>⭐⭐⭐ (3/5)</option>
+                    <option value={2}>⭐⭐ (2/5)</option>
+                    <option value={1}>⭐ (1/5)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label" style={{ fontSize: '0.75rem' }}>EV Model</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="e.g. Tata Nexon EV, MG ZS EV"
+                    value={newVehicle}
+                    onChange={e => setNewVehicle(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div style={{ marginBottom: '0.75rem' }}>
+                <textarea
+                  className="form-control"
+                  rows={2}
+                  placeholder="Share details on charging speed, connector health, amenities, etc."
+                  value={newComment}
+                  onChange={e => setNewComment(e.target.value)}
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn btn-primary btn-sm"
+                disabled={submittingReview}
+              >
+                {submittingReview ? 'Submitting...' : 'Post Verified Review'}
+              </button>
+            </form>
+
+            {/* Reviews List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {reviews.length === 0 ? (
+                <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>
+                  No reviews yet for this station. Be the first to review!
+                </div>
+              ) : (
+                reviews.map(r => (
+                  <div key={r.id} style={{ background: 'var(--surface-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.85rem 1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.875rem', color: '#FFFFFF' }}>
+                        {r.driverName || 'Verified EV Driver'}
+                        {r.vehicleModel && (
+                          <span style={{ fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 500, marginLeft: '0.5rem' }}>
+                            • {r.vehicleModel}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 700 }}>
+                        {'★'.repeat(r.rating || 5)}{'☆'.repeat(5 - (r.rating || 5))}
+                      </div>
+                    </div>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem', margin: 0, lineHeight: 1.4 }}>
+                      {r.comment}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Sticky Booking Summary */}
@@ -297,6 +428,15 @@ export default function StationDetail() {
               {booking ? 'Confirming Reservation...' : <><Zap size={16} fill="currentColor" /> Confirm Booking</>}
             </button>
 
+            <button
+              type="button"
+              className="btn btn-secondary btn-block"
+              style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', fontSize: '0.825rem' }}
+              onClick={() => setEstimatorOpen(true)}
+            >
+              <Calculator size={14} color="var(--primary)" /> Estimate Charging Cost
+            </button>
+
             {!user && (
               <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '0.85rem' }}>
                 <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 700 }}>Sign in</Link> required to confirm slot
@@ -305,6 +445,13 @@ export default function StationDetail() {
           </div>
         </div>
       </div>
+
+      <CostEstimatorModal
+        isOpen={estimatorOpen}
+        onClose={() => setEstimatorOpen(false)}
+        initialPowerKw={selectedCharger?.powerKw || 60}
+        initialTariff={station?.pricePerKwh || 18.5}
+      />
     </div>
   );
 }

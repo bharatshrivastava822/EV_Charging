@@ -21,6 +21,7 @@ import java.util.List;
 public class OperatorController {
 
     private final OperatorService operatorService;
+    private final com.evcharging.service.MaintenanceService maintenanceService;
 
     @GetMapping("/status")
     public ResponseEntity<OperatorDTO.OperatorStatusResponse> getOperatorStatus(Authentication authentication) {
@@ -86,4 +87,29 @@ public class OperatorController {
         List<BookingDTO.BookingResponse> bookings = operatorService.getOperatorBookings(authentication.getName());
         return ResponseEntity.ok(bookings);
     }
+
+    @PostMapping("/maintenance")
+    public ResponseEntity<com.evcharging.dto.FeatureDTO.MaintenanceResponse> reportMaintenance(
+            Authentication authentication,
+            @Valid @RequestBody com.evcharging.dto.FeatureDTO.MaintenanceRequest request) {
+        com.evcharging.dto.FeatureDTO.MaintenanceResponse response = maintenanceService.reportIssue(authentication.getName(), request);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/maintenance")
+    public ResponseEntity<List<com.evcharging.dto.FeatureDTO.MaintenanceResponse>> getOperatorMaintenanceReports(
+            Authentication authentication) {
+        List<com.evcharging.dto.FeatureDTO.MaintenanceResponse> reports = maintenanceService.getOperatorReports(authentication.getName());
+        return ResponseEntity.ok(reports);
+    }
+
+    @PostMapping("/maintenance/{id}/resolve")
+    public ResponseEntity<com.evcharging.dto.FeatureDTO.MaintenanceResponse> resolveMaintenance(
+            Authentication authentication,
+            @PathVariable Long id,
+            @Valid @RequestBody com.evcharging.dto.FeatureDTO.MaintenanceResolutionRequest request) {
+        com.evcharging.dto.FeatureDTO.MaintenanceResponse response = maintenanceService.resolveIssue(id, authentication.getName(), request);
+        return ResponseEntity.ok(response);
+    }
 }
+

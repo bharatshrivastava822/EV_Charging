@@ -59,10 +59,31 @@ class EvChargingApplicationTests {
     private BookingRepository bookingRepository;
 
     @Autowired
+    private com.evcharging.repository.UserRepository userRepository;
+
+    @Autowired
     private com.evcharging.service.OperatorService operatorService;
 
     @Autowired
     private com.evcharging.service.AdminService adminService;
+
+    @Autowired
+    private com.evcharging.service.CostEstimatorService costEstimatorService;
+
+    @Autowired
+    private com.evcharging.service.RecommendationService recommendationService;
+
+    @Autowired
+    private com.evcharging.service.MaintenanceService maintenanceService;
+
+    @Autowired
+    private com.evcharging.service.SimulationService simulationService;
+
+    @Autowired
+    private com.evcharging.service.NotificationService notificationService;
+
+    @Autowired
+    private com.evcharging.service.ReviewService reviewService;
 
     private ChargingStation testStation;
     private Charger testCharger;
@@ -338,5 +359,110 @@ class EvChargingApplicationTests {
         assertThrows(BadRequestException.class, () -> {
             authService.register(req);
         });
+    }
+
+    @Test
+    @DisplayName("Test 13: Charging Cost Estimator Calculation")
+    void testCostEstimatorCalculation() {
+        com.evcharging.dto.FeatureDTO.CostEstimateRequest req = new com.evcharging.dto.FeatureDTO.CostEstimateRequest();
+        req.setEnergyKwh(30.0);
+        req.setPricePerKwh(18.0);
+        req.setServiceFee(15.0);
+
+        com.evcharging.dto.FeatureDTO.CostEstimateResponse res = costEstimatorService.calculateEstimate(req);
+        assertEquals(540.0, res.getBaseCostInr());
+        assertEquals(15.0, res.getServiceFeeInr());
+        assertEquals(555.0, res.getTotalEstimatedCostInr());
+        assertNotNull(res.getDisclaimer());
+
+        // Negative value test
+        com.evcharging.dto.FeatureDTO.CostEstimateRequest invalidReq = new com.evcharging.dto.FeatureDTO.CostEstimateRequest();
+        invalidReq.setEnergyKwh(-10.0);
+        assertThrows(BadRequestException.class, () -> costEstimatorService.calculateEstimate(invalidReq));
+    }
+
+    @Test
+    @DisplayName("Test 14: Smart Station Recommendations")
+    void testSmartRecommendationEngine() {
+        List<com.evcharging.dto.FeatureDTO.StationRecommendation> recs = recommendationService.getRecommendations(22.7533, 75.8937, null, 5);
+        assertNotNull(recs);
+        assertFalse(recs.isEmpty());
+        assertTrue(recs.get(0).getScore() > 0);
+        assertNotNull(recs.get(0).getPrimaryReason());
+    }
+
+    @Test
+    @DisplayName("Test 15: Charger Maintenance Reporting & Status Restoration")
+    void testMaintenanceWorkflow() {
+        com.evcharging.dto.FeatureDTO.MaintenanceRequest req = new com.evcharging.dto.FeatureDTO.MaintenanceRequest();
+        req.setChargerId(testCharger.getId());
+        req.setIssueDescription("Display panel flicker and loose gun pin");
+        req.setSeverity("HIGH");
+
+        com.evcharging.dto.FeatureDTO.MaintenanceResponse report = maintenanceService.reportIssue("admin@evcharge.in", req);
+        assertNotNull(report.getId());
+        assertEquals("OPEN", report.getStatus());
+
+        // Verify charger status changed to MAINTENANCE
+        Charger c = chargerRepository.findById(testCharger.getId()).get();
+        assertEquals(Charger.ChargerStatus.MAINTENANCE, c.getStatus());
+
+        // Resolve maintenance
+        com.evcharging.dto.FeatureDTO.MaintenanceResolutionRequest resolveReq = new com.evcharging.dto.FeatureDTO.MaintenanceResolutionRequest();
+        resolveReq.setResolutionNotes("Replaced gun pin and rebooted telematics board");
+        resolveReq.setStatus("RESOLVED");
+
+        com.evcharging.dto.FeatureDTO.MaintenanceResponse resolved = maintenanceService.resolveIssue(report.getId(), "admin@evcharge.in", resolveReq);
+        assertEquals("RESOLVED", resolved.getStatus());
+
+        // Verify charger restored to ACTIVE
+        Charger cRestored = chargerRepository.findById(testCharger.getId()).get();
+        assertEquals(Charger.ChargerStatus.ACTIVE, cRestored.getStatus());
+    }
+
+    @Test
+    @DisplayName("Test 16: Live Simulation Engine Session Lifecycle")
+    void testChargingSessionSimulationEngine() {
+        AuthDTO.RegisterRequest drvReq = new AuthDTO.RegisterRequest("Sim Driver", "simdriver@test.com", "Pass@123", "9876543277");
+        authService.register(drvReq);
+
+        BookingDTO.BookingRequest bookReq = new BookingDTO.BookingRequest(testStation.getId(), testCharger.getId(), testSlot.getId());
+        BookingDTO.BookingResponse booking = bookingService.createBooking(bookReq, "simdriver@test.com");
+
+        // Start session
+        com.evcharging.dto.FeatureDTO.SessionStartRequest startReq = new com.evcharging.dto.FeatureDTO.SessionStartRequest();
+        startReq.setBookingId(booking.getId());
+        startReq.setStartBatteryPct(25);
+        startReq.setTargetBatteryPct(35);
+
+        com.evcharging.dto.FeatureDTO.SessionResponse session = simulationService.startSession("simdriver@test.com", startReq);
+        assertEquals("IN_PROGRESS", session.getStatus());
+        assertEquals(25, session.getBatteryCurrentPct());
+
+        // Tick simulation
+        com.evcharging.dto.FeatureDTO.SessionResponse ticked = simulationService.tickSimulation(session.getId(), "simdriver@test.com");
+        assertTrue(ticked.getBatteryCurrentPct() > 25);
+        assertTrue(ticked.getEnergyDeliveredKwh() > 0);
+
+        // Stop session
+        com.evcharging.dto.FeatureDTO.SessionResponse stopped = simulationService.stopSession(session.getId(), "simdriver@test.com");
+        assertEquals("STOPPED", stopped.getStatus());
+    }
+
+    @Test
+    @DisplayName("Test 17: In-App Notification Dispatch & Read Management")
+    void testNotificationDispatchAndReadStatus() {
+        com.evcharging.entity.User user = userRepository.findByEmail("admin@evcharge.in").get();
+        notificationService.createNotification(user, "System Test", "Test alert content", com.evcharging.entity.Notification.NotificationType.SYSTEM);
+
+        List<com.evcharging.dto.FeatureDTO.NotificationResponse> notifs = notificationService.getUserNotifications("admin@evcharge.in");
+        assertFalse(notifs.isEmpty());
+
+        long unreadBefore = notificationService.getUnreadCount("admin@evcharge.in");
+        assertTrue(unreadBefore > 0);
+
+        notificationService.markAllAsRead("admin@evcharge.in");
+        long unreadAfter = notificationService.getUnreadCount("admin@evcharge.in");
+        assertEquals(0, unreadAfter);
     }
 }

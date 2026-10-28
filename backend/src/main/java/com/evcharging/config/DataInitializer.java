@@ -24,6 +24,9 @@ public class DataInitializer implements CommandLineRunner {
     private final ChargerRepository chargerRepository;
     private final SlotRepository slotRepository;
     private final PasswordEncoder passwordEncoder;
+    private final com.evcharging.repository.StationReviewRepository reviewRepository;
+    private final com.evcharging.repository.MaintenanceReportRepository maintenanceRepository;
+    private final com.evcharging.repository.NotificationRepository notificationRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -222,6 +225,48 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         slotRepository.saveAll(initialSlots);
+
+        // 5. Initial Reviews for Stations
+        reviewRepository.save(StationReview.builder()
+                .station(s1)
+                .user(aryan)
+                .rating(5)
+                .comment("Excellent charging speed! 120kW CCS2 took Nexon EV from 20% to 80% in 35 mins.")
+                .build());
+
+        reviewRepository.save(StationReview.builder()
+                .station(s1)
+                .user(priya)
+                .rating(5)
+                .comment("Clean premises, shade canopy, and reliable QR booking unlock.")
+                .build());
+
+        reviewRepository.save(StationReview.builder()
+                .station(s2)
+                .user(aryan)
+                .rating(4)
+                .comment("Good location right next to Bombay Hospital. Clean bays.")
+                .build());
+
+        // 6. Sample Operator Maintenance Ticket
+        maintenanceRepository.save(MaintenanceReport.builder()
+                .station(s1)
+                .charger(chargers.get(2)) // C03
+                .reportedBy(operatorApproved)
+                .issueDescription("Connector latch mechanism loose on Type-2 gun. Scheduled for recalibration.")
+                .severity(MaintenanceReport.Severity.LOW)
+                .status(MaintenanceReport.MaintenanceStatus.OPEN)
+                .build());
+
+        // 7. Initial Welcome Notification for Driver
+        notificationRepository.save(Notification.builder()
+                .user(aryan)
+                .title("Welcome to ChargerGo 2.0")
+                .message("Discover smart recommendations, reserve slots in advance, and test the new Live Simulation Engine!")
+                .type(Notification.NotificationType.SYSTEM)
+                .read(false)
+                .build());
+
         log.info("Database seeding completed with {} chargers and {} initial slots.", savedChargers.size(), initialSlots.size());
     }
 }

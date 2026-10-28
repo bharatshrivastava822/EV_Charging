@@ -24,6 +24,7 @@ public class StationService {
     private final ChargingStationRepository stationRepository;
     private final ChargerRepository chargerRepository;
     private final SlotRepository slotRepository;
+    private final com.evcharging.repository.StationReviewRepository reviewRepository;
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -161,6 +162,10 @@ public class StationService {
                 .max()
                 .orElse(0.0);
 
+        Double avgRating = reviewRepository != null ? reviewRepository.getAverageRatingForStation(station.getId()) : null;
+        double rating = avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : 4.8;
+        double price = station.getPricePerKwh() != null ? station.getPricePerKwh() : 18.50;
+
         return StationDTO.StationSummary.builder()
                 .id(station.getId())
                 .name(station.getName())
@@ -172,6 +177,8 @@ public class StationService {
                 .closingTime(station.getClosingTime().format(TIME_FORMATTER))
                 .status(station.getStatus().name())
                 .approvalStatus(station.getApprovalStatus() != null ? station.getApprovalStatus().name() : ChargingStation.ApprovalStatus.APPROVED.name())
+                .pricePerKwh(price)
+                .rating(rating)
                 .ownerId(station.getOwner() != null ? station.getOwner().getId() : null)
                 .ownerName(station.getOwner() != null ? station.getOwner().getName() : null)
                 .totalChargers(station.getChargers().size())
@@ -190,6 +197,10 @@ public class StationService {
                 .filter(c -> c.getStatus() == Charger.ChargerStatus.ACTIVE)
                 .count();
 
+        Double avgRating = reviewRepository != null ? reviewRepository.getAverageRatingForStation(station.getId()) : null;
+        double rating = avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : 4.8;
+        double price = station.getPricePerKwh() != null ? station.getPricePerKwh() : 18.50;
+
         return StationDTO.StationResponse.builder()
                 .id(station.getId())
                 .name(station.getName())
@@ -203,6 +214,8 @@ public class StationService {
                 .closingTime(station.getClosingTime().format(TIME_FORMATTER))
                 .status(station.getStatus().name())
                 .approvalStatus(station.getApprovalStatus() != null ? station.getApprovalStatus().name() : ChargingStation.ApprovalStatus.APPROVED.name())
+                .pricePerKwh(price)
+                .rating(rating)
                 .ownerId(station.getOwner() != null ? station.getOwner().getId() : null)
                 .ownerName(station.getOwner() != null ? station.getOwner().getName() : null)
                 .imageUrl(station.getImageUrl())

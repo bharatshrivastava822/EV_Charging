@@ -123,48 +123,6 @@ export const adminService = {
   },
 
   /**
-   * Create a 30-minute booking time slot
-   */
-  createSlot: async (slotData) => {
-    try {
-      const response = await api.post('/slots', slotData);
-      if (response.data) return response.data;
-      throw new Error('Failed to create slot.');
-    } catch (apiError) {
-      const msg = apiError.response?.data?.message || apiError.customMessage || 'Slot creation failed.';
-      throw new Error(msg);
-    }
-  },
-
-  /**
-   * Update slot status (AVAILABLE / BOOKED / BLOCKED / MAINTENANCE)
-   */
-  updateSlotStatus: async (slotId, status) => {
-    try {
-      const response = await api.patch(`/slots/${slotId}/status`, null, { params: { status } });
-      if (response.data) return response.data;
-      throw new Error('Failed to update slot status.');
-    } catch (apiError) {
-      const msg = apiError.response?.data?.message || apiError.customMessage || 'Slot status update failed.';
-      throw new Error(msg);
-    }
-  },
-
-  /**
-   * Admin booking cancellation
-   */
-  cancelBooking: async (id) => {
-    try {
-      const response = await api.patch(`/bookings/${id}/cancel`);
-      if (response.data) return response.data;
-      throw new Error('Failed to cancel booking.');
-    } catch (apiError) {
-      const msg = apiError.response?.data?.message || apiError.customMessage || 'Unable to cancel booking.';
-      throw new Error(msg);
-    }
-  },
-
-  /**
    * Get pending operator applications
    */
   getPendingOperators: async () => {
@@ -212,6 +170,32 @@ export const adminService = {
       return response.data;
     } catch (err) {
       const msg = err.response?.data?.message || err.customMessage || 'Station review failed.';
+      throw new Error(msg);
+    }
+  },
+
+  /**
+   * Get all platform maintenance tickets
+   */
+  getMaintenanceReports: async () => {
+    try {
+      const response = await api.get('/admin/maintenance');
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (err) {
+      console.error('Failed to fetch maintenance reports:', err);
+      throw err;
+    }
+  },
+
+  /**
+   * Resolve platform maintenance ticket
+   */
+  resolveMaintenance: async (id, resolutionData) => {
+    try {
+      const response = await api.post(`/admin/maintenance/${id}/resolve`, resolutionData);
+      return response.data;
+    } catch (err) {
+      const msg = err.response?.data?.message || err.customMessage || 'Failed to resolve ticket.';
       throw new Error(msg);
     }
   }

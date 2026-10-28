@@ -55,6 +55,10 @@ public class ChargingStation {
     @Builder.Default
     private ApprovalStatus approvalStatus = ApprovalStatus.APPROVED;
 
+    @Column(name = "price_per_kwh")
+    @Builder.Default
+    private Double pricePerKwh = 18.50;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;

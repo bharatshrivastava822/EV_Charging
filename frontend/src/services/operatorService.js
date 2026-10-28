@@ -116,5 +116,30 @@ export const operatorService = {
       console.error('Failed to fetch operator bookings:', err);
       throw err;
     }
+  },
+
+  /**
+   * Report maintenance ticket on charger
+   */
+  reportMaintenance: async (reportData) => {
+    const response = await api.post('/operator/maintenance', reportData);
+    return response.data;
+  },
+
+  /**
+   * Get maintenance tickets for operator's stations
+   */
+  getMaintenanceReports: async () => {
+    const response = await api.get('/operator/maintenance');
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  /**
+   * Resolve maintenance ticket
+   */
+  resolveMaintenance: async (id, resolutionData) => {
+    const response = await api.post(`/operator/maintenance/${id}/resolve`, resolutionData);
+    return response.data;
   }
 };
+

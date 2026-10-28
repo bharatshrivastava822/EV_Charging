@@ -68,6 +68,10 @@ public class SecurityConfig {
                 // Public station browsing & availability
                 .requestMatchers(HttpMethod.GET, "/api/stations/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/slots/**").permitAll()
+                // Public calculations & recommendations
+                .requestMatchers("/api/features/estimate-cost").permitAll()
+                .requestMatchers("/api/features/recommendations").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/features/reviews/station/**").permitAll()
                 // Station Operator endpoints
                 .requestMatchers("/api/operator/**").hasAnyRole("STATION_OPERATOR", "ADMIN")
                 // Admin-only endpoints

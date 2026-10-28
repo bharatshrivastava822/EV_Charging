@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { featureService } from '../services/featureService';
+import CostEstimatorModal from './CostEstimatorModal';
 import {
   Zap,
   Menu,
@@ -15,7 +17,10 @@ import {
   ShieldCheck,
   HelpCircle,
   Globe,
-  Radio
+  Radio,
+  Bell,
+  Calculator,
+  CheckCircle2
 } from 'lucide-react';
 import './Navbar.css';
 
@@ -24,6 +29,39 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [estimatorOpen, setEstimatorOpen] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      loadNotifications();
+    }
+  }, [user]);
+
+  const loadNotifications = async () => {
+    try {
+      const [list, count] = await Promise.all([
+        featureService.getNotifications(),
+        featureService.getUnreadCount()
+      ]);
+      setNotifications(list);
+      setUnreadCount(count);
+    } catch (err) {
+      // ignore
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await featureService.markAllAsRead();
+      setUnreadCount(0);
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -88,8 +126,72 @@ export default function Navbar() {
 
           {/* Right Side Header Controls */}
           <div className="header-controls-box">
+            {/* Quick Estimator Button */}
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => setEstimatorOpen(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.75rem', fontSize: '0.78rem' }}
+              title="Calculate estimated EV charging cost"
+            >
+              <Calculator size={13} color="var(--primary)" />
+              <span className="hide-on-mobile">Cost Estimator</span>
+            </button>
+
             {user ? (
               <>
+                {/* Notification Bell */}
+                <div className="notif-menu-box">
+                  <button
+                    className="notif-trigger-btn"
+                    onClick={() => {
+                      setNotifOpen(!notifOpen);
+                      if (userMenuOpen) setUserMenuOpen(false);
+                    }}
+                    aria-label="View notifications"
+                    title="In-App Notifications"
+                  >
+                    <Bell size={16} />
+                    {unreadCount > 0 && (
+                      <span className="notif-badge-pill">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {notifOpen && (
+                    <div className="notif-dropdown-popover">
+                      <div className="notif-header">
+                        <div className="notif-header-title">
+                          <Bell size={14} color="var(--primary)" />
+                          <span>Notifications</span>
+                        </div>
+                        {unreadCount > 0 && (
+                          <button className="notif-mark-read-btn" onClick={handleMarkAllRead}>
+                            Mark all read
+                          </button>
+                        )}
+                      </div>
+                      <div className="notif-list">
+                        {notifications.length === 0 ? (
+                          <div className="notif-empty">
+                            No notifications yet
+                          </div>
+                        ) : (
+                          notifications.slice(0, 10).map((n) => (
+                            <div key={n.id} className={`notif-item ${!n.read ? 'unread' : ''}`}>
+                              <div className="notif-item-title">{n.title}</div>
+                              <div className="notif-item-msg">{n.message}</div>
+                              <div className="notif-item-time">
+                                {n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently'}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <span className="role-badge-pill">
                   <ShieldCheck size={13} color="var(--primary)" />
                   {getRoleBadgeLabel()}
@@ -292,7 +394,10 @@ export default function Navbar() {
       </nav>
 
       {userMenuOpen && <div className="nav-backdrop" onClick={() => setUserMenuOpen(false)} />}
+      {notifOpen && <div className="nav-backdrop" onClick={() => setNotifOpen(false)} />}
       {mobileOpen && <div className="nav-backdrop" onClick={closeMobile} />}
+
+      <CostEstimatorModal isOpen={estimatorOpen} onClose={() => setEstimatorOpen(false)} />
     </header>
   );
 }

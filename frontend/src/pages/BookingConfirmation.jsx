@@ -3,6 +3,7 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 import { CheckCircle, Calendar, Clock, Zap, MapPin, ArrowLeft, ArrowRight, ShieldCheck } from 'lucide-react';
 import { bookingService } from '../services/bookingService';
 import { LoadingState, ErrorState } from '../components/UI';
+import LiveChargingSimulator from '../components/LiveChargingSimulator';
 
 export default function BookingConfirmation() {
   const { id } = useParams();
@@ -66,6 +67,15 @@ export default function BookingConfirmation() {
             <span className="badge badge-confirmed">● {booking.status}</span>
           </div>
         </div>
+      </div>
+
+      {/* Virtual Live Charging Telemetry Simulator */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <LiveChargingSimulator
+          bookingId={booking.id}
+          powerKw={booking.powerKw || 60}
+          pricePerKwh={18.5}
+        />
       </div>
 
       {/* Action Buttons */}

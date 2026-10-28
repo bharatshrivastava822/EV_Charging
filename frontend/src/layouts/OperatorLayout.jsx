@@ -10,7 +10,8 @@ import {
   LogOut, 
   ArrowLeft,
   ShieldCheck,
-  Zap
+  Zap,
+  Wrench
 } from 'lucide-react';
 
 export default function OperatorLayout() {
@@ -139,6 +140,25 @@ export default function OperatorLayout() {
           >
             <Calendar size={16} /> Station Reservations
           </NavLink>
+
+          <NavLink
+            to="/operator/maintenance"
+            className={({ isActive }) => `operator-tab ${isActive ? 'active' : ''}`}
+            style={({ isActive }) => ({
+              padding: '0.85rem 1.25rem',
+              color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
+              borderBottom: isActive ? '2px solid var(--primary)' : '2px solid transparent',
+              textDecoration: 'none',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              whiteSpace: 'nowrap'
+            })}
+          >
+            <Wrench size={16} /> Maintenance & Faults
+          </NavLink>
         </div>
       </div>
 
@@ -149,3 +169,4 @@ export default function OperatorLayout() {
     </div>
   );
 }
+

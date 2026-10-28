@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { stationService } from '../services/stationService';
 import StationCard from '../components/StationCard';
+import SmartRecommendations from '../components/SmartRecommendations';
 import { LoadingState, EmptyState, ErrorState } from '../components/UI';
 import { Search, Filter, MapPin, Zap } from 'lucide-react';
 
@@ -115,6 +116,11 @@ export default function StationList() {
           )}
         </div>
       </form>
+
+      {/* Smart Recommendations Engine */}
+      <div style={{ marginBottom: '2rem' }}>
+        <SmartRecommendations />
+      </div>
 
       {/* Results Header */}
       {!loading && !error && (

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Zap, LayoutDashboard, Building2, CalendarCheck, Users, LogOut, Menu, X, ArrowLeft, ShieldCheck, Clock } from 'lucide-react';
+import { Zap, LayoutDashboard, Building2, CalendarCheck, Users, LogOut, Menu, X, ArrowLeft, ShieldCheck, Clock, Wrench } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const NAV_ITEMS = [
@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: '/admin/approvals', label: 'Approvals & Partners', icon: <ShieldCheck size={16} /> },
   { to: '/admin/stations', label: 'Station Management', icon: <Building2 size={16} /> },
   { to: '/admin/slots', label: 'Slot Configuration', icon: <Clock size={16} /> },
+  { to: '/admin/maintenance', label: 'Maintenance Incidents', icon: <Wrench size={16} /> },
   { to: '/admin/bookings', label: 'All Bookings', icon: <CalendarCheck size={16} /> },
   { to: '/admin/users', label: 'Registered Drivers', icon: <Users size={16} /> }
 ];

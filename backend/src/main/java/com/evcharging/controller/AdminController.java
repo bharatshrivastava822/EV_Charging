@@ -3,9 +3,11 @@ package com.evcharging.controller;
 import com.evcharging.dto.AuthDTO;
 import com.evcharging.dto.BookingDTO;
 import com.evcharging.service.AdminService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    private final com.evcharging.service.MaintenanceService maintenanceService;
 
     @GetMapping("/stats")
     public ResponseEntity<BookingDTO.AdminStats> getDashboardStats() {
@@ -64,6 +67,21 @@ public class AdminController {
             @PathVariable Long id,
             @RequestBody AuthDTO.StationReviewRequest request) {
         com.evcharging.dto.StationDTO.StationResponse response = adminService.reviewStation(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/maintenance")
+    public ResponseEntity<List<com.evcharging.dto.FeatureDTO.MaintenanceResponse>> getAllMaintenanceReports() {
+        List<com.evcharging.dto.FeatureDTO.MaintenanceResponse> reports = maintenanceService.getAllReports();
+        return ResponseEntity.ok(reports);
+    }
+
+    @PostMapping("/maintenance/{id}/resolve")
+    public ResponseEntity<com.evcharging.dto.FeatureDTO.MaintenanceResponse> resolveMaintenance(
+            Authentication authentication,
+            @PathVariable Long id,
+            @Valid @RequestBody com.evcharging.dto.FeatureDTO.MaintenanceResolutionRequest request) {
+        com.evcharging.dto.FeatureDTO.MaintenanceResponse response = maintenanceService.resolveIssue(id, authentication.getName(), request);
         return ResponseEntity.ok(response);
     }
 }

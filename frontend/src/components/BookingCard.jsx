@@ -61,7 +61,12 @@ export default function BookingCard({ booking, onCancel, showCancelButton = true
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '0.65rem', justifyContent: 'flex-end', paddingTop: '0.5rem' }}>
+      <div style={{ display: 'flex', gap: '0.65rem', justifyContent: 'flex-end', paddingTop: '0.5rem', flexWrap: 'wrap' }}>
+        {booking.status === 'CONFIRMED' && (
+          <Link to={`/bookings/${booking.id}`} className="btn btn-primary btn-sm">
+            <Zap size={13} fill="currentColor" /> Live Telemetry
+          </Link>
+        )}
         {canCancel && onCancel && (
           <button className="btn btn-danger-outline btn-sm" onClick={() => onCancel(booking.id)}>
             <XCircle size={14} /> Cancel Slot

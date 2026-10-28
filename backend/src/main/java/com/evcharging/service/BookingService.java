@@ -27,6 +27,7 @@ public class BookingService {
     private final ChargingStationRepository stationRepository;
     private final ChargerRepository chargerRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm a");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy");
@@ -111,6 +112,16 @@ public class BookingService {
 
         Booking savedBooking = bookingRepository.save(booking);
 
+        if (notificationService != null) {
+            notificationService.createNotification(
+                    user,
+                    "Charging Slot Confirmed",
+                    String.format("Slot confirmed at %s (%s). Reference: #%s. Date: %s at %s.",
+                            station.getName(), charger.getChargerNumber(), bookingReference, slot.getSlotDate(), slot.getStartTime()),
+                    com.evcharging.entity.Notification.NotificationType.BOOKING
+            );
+        }
+
         return mapToResponse(savedBooking);
     }
 
@@ -143,6 +154,16 @@ public class BookingService {
         if (slot != null) {
             slot.setStatus(Slot.SlotStatus.AVAILABLE);
             slotRepository.save(slot);
+        }
+
+        if (notificationService != null && booking.getUser() != null) {
+            notificationService.createNotification(
+                    booking.getUser(),
+                    "Booking Cancelled",
+                    String.format("Reservation #%s for %s has been cancelled and the slot released.",
+                            booking.getBookingReference(), booking.getStation().getName()),
+                    com.evcharging.entity.Notification.NotificationType.BOOKING
+            );
         }
 
         return mapToResponse(booking);

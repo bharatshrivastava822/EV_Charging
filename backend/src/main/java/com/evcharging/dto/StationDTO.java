@@ -24,6 +24,8 @@ public class StationDTO {
         private String closingTime;
         private String status;
         private String approvalStatus;
+        private Double pricePerKwh;
+        private Double rating;
         private Long ownerId;
         private String ownerName;
         private String imageUrl;
@@ -46,6 +48,8 @@ public class StationDTO {
         private String closingTime;
         private String status;
         private String approvalStatus;
+        private Double pricePerKwh;
+        private Double rating;
         private Long ownerId;
         private String ownerName;
         private int totalChargers;
