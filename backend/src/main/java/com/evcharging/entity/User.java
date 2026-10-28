@@ -30,7 +30,12 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private Role role = Role.USER;
+    private Role role = Role.DRIVER;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "operator_status", nullable = false)
+    @Builder.Default
+    private OperatorStatus operatorStatus = OperatorStatus.NONE;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -50,6 +55,10 @@ public class User {
     }
 
     public enum Role {
-        USER, ADMIN
+        DRIVER, STATION_OPERATOR, ADMIN, USER
+    }
+
+    public enum OperatorStatus {
+        NONE, PENDING, APPROVED, REJECTED
     }
 }

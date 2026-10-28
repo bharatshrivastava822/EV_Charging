@@ -32,11 +32,19 @@ public class StationService {
         List<ChargingStation> stations;
 
         if (search != null && !search.trim().isEmpty()) {
-            stations = stationRepository.searchStations(search.trim(), ChargingStation.StationStatus.ACTIVE);
+            stations = stationRepository.searchApprovedStations(
+                    search.trim(), 
+                    ChargingStation.StationStatus.ACTIVE, 
+                    ChargingStation.ApprovalStatus.APPROVED);
         } else if (city != null && !city.trim().isEmpty()) {
-            stations = stationRepository.findByCityContainingIgnoreCaseAndStatus(city.trim(), ChargingStation.StationStatus.ACTIVE);
+            stations = stationRepository.findByCityContainingIgnoreCaseAndStatusAndApprovalStatus(
+                    city.trim(), 
+                    ChargingStation.StationStatus.ACTIVE, 
+                    ChargingStation.ApprovalStatus.APPROVED);
         } else {
-            stations = stationRepository.findByStatus(ChargingStation.StationStatus.ACTIVE);
+            stations = stationRepository.findByStatusAndApprovalStatus(
+                    ChargingStation.StationStatus.ACTIVE, 
+                    ChargingStation.ApprovalStatus.APPROVED);
         }
 
         return stations.stream()
@@ -163,6 +171,9 @@ public class StationService {
                 .openingTime(station.getOpeningTime().format(TIME_FORMATTER))
                 .closingTime(station.getClosingTime().format(TIME_FORMATTER))
                 .status(station.getStatus().name())
+                .approvalStatus(station.getApprovalStatus() != null ? station.getApprovalStatus().name() : ChargingStation.ApprovalStatus.APPROVED.name())
+                .ownerId(station.getOwner() != null ? station.getOwner().getId() : null)
+                .ownerName(station.getOwner() != null ? station.getOwner().getName() : null)
                 .totalChargers(station.getChargers().size())
                 .availableChargers(activeChargers.size())
                 .chargerTypes(types)
@@ -191,6 +202,9 @@ public class StationService {
                 .openingTime(station.getOpeningTime().format(TIME_FORMATTER))
                 .closingTime(station.getClosingTime().format(TIME_FORMATTER))
                 .status(station.getStatus().name())
+                .approvalStatus(station.getApprovalStatus() != null ? station.getApprovalStatus().name() : ChargingStation.ApprovalStatus.APPROVED.name())
+                .ownerId(station.getOwner() != null ? station.getOwner().getId() : null)
+                .ownerName(station.getOwner() != null ? station.getOwner().getName() : null)
                 .imageUrl(station.getImageUrl())
                 .totalChargers(station.getChargers().size())
                 .activeChargers((int) activeCount)

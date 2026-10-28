@@ -36,7 +36,18 @@ export default function Login() {
     try {
       const user = await login({ email: form.email, password: form.password });
       addToast(`Welcome back, ${user.name.split(' ')[0]}!`, 'success');
-      navigate(user.role === 'ADMIN' ? '/admin' : from, { replace: true });
+      
+      if (user.role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else if (user.role === 'STATION_OPERATOR') {
+        if (user.operatorStatus === 'APPROVED') {
+          navigate('/operator', { replace: true });
+        } else {
+          navigate('/operator/status', { replace: true });
+        }
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (err) {
       const msg = err.message || err.response?.data?.message || 'Invalid email or password.';
       setErrors({ general: msg });
@@ -148,7 +159,15 @@ export default function Login() {
                 onClick={() => handleQuickFill('aryan@example.com', 'User@123')}
                 style={{ fontSize: '0.75rem' }}
               >
-                EV Driver (Aryan)
+                Driver (Aryan)
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => handleQuickFill('operator@evcharge.in', 'Operator@123')}
+                style={{ fontSize: '0.75rem', borderColor: 'rgba(59, 130, 246, 0.4)', color: '#60A5FA' }}
+              >
+                Operator (Vikram)
               </button>
               <button
                 type="button"
@@ -156,7 +175,7 @@ export default function Login() {
                 onClick={() => handleQuickFill('admin@evcharge.in', 'Admin@123')}
                 style={{ fontSize: '0.75rem', borderColor: 'var(--primary-border)', color: 'var(--primary)' }}
               >
-                Admin (Manager)
+                Admin (Console)
               </button>
             </div>
           </div>

@@ -162,5 +162,57 @@ export const adminService = {
       const msg = apiError.response?.data?.message || apiError.customMessage || 'Unable to cancel booking.';
       throw new Error(msg);
     }
+  },
+
+  /**
+   * Get pending operator applications
+   */
+  getPendingOperators: async () => {
+    try {
+      const response = await api.get('/admin/operators/pending');
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (err) {
+      console.error('Failed to fetch pending operators:', err);
+      throw err;
+    }
+  },
+
+  /**
+   * Review operator application (APPROVED / REJECTED)
+   */
+  reviewOperator: async (userId, status, reason = '') => {
+    try {
+      const response = await api.post(`/admin/operators/${userId}/review`, { status, reason });
+      return response.data;
+    } catch (err) {
+      const msg = err.response?.data?.message || err.customMessage || 'Operator review failed.';
+      throw new Error(msg);
+    }
+  },
+
+  /**
+   * Get pending station submissions
+   */
+  getPendingStations: async () => {
+    try {
+      const response = await api.get('/admin/stations/pending');
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (err) {
+      console.error('Failed to fetch pending stations:', err);
+      throw err;
+    }
+  },
+
+  /**
+   * Review station submission (APPROVED / REJECTED)
+   */
+  reviewStation: async (stationId, status, comments = '') => {
+    try {
+      const response = await api.post(`/admin/stations/${stationId}/review`, { status, comments });
+      return response.data;
+    } catch (err) {
+      const msg = err.response?.data?.message || err.customMessage || 'Station review failed.';
+      throw new Error(msg);
+    }
   }
 };

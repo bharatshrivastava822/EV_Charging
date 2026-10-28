@@ -58,6 +58,12 @@ class EvChargingApplicationTests {
     @Autowired
     private BookingRepository bookingRepository;
 
+    @Autowired
+    private com.evcharging.service.OperatorService operatorService;
+
+    @Autowired
+    private com.evcharging.service.AdminService adminService;
+
     private ChargingStation testStation;
     private Charger testCharger;
     private Slot testSlot;
@@ -109,7 +115,7 @@ class EvChargingApplicationTests {
 
         assertNotNull(response.getToken());
         assertEquals("rahul.test@example.com", response.getEmail());
-        assertEquals("USER", response.getRole());
+        assertEquals("DRIVER", response.getRole());
     }
 
     @Test
@@ -273,6 +279,64 @@ class EvChargingApplicationTests {
         // 3. Unauthorized user cannot access
         assertThrows(BadRequestException.class, () -> {
             bookingService.getBookingByReference(ref, "userb@test.com", false);
+        });
+    }
+
+    @Test
+    @DisplayName("Test 11: Station Operator Registration & Admin Approval Workflow")
+    void testOperatorRegistrationAndApprovalWorkflow() {
+        // 1. Register as Station Operator
+        AuthDTO.RegisterRequest opReq = new AuthDTO.RegisterRequest(
+                "Kunal Operators", "kunal@testops.com", "Pass@123", "9876543299", "STATION_OPERATOR");
+        AuthDTO.AuthResponse opResp = authService.register(opReq);
+
+        assertEquals("STATION_OPERATOR", opResp.getRole());
+        assertEquals("PENDING", opResp.getOperatorStatus());
+
+        // 2. Pending operator cannot create station
+        StationDTO.StationRequest newStation = new StationDTO.StationRequest();
+        newStation.setName("Kunal Hub Jaipur");
+        newStation.setAddress("MI Road");
+        newStation.setCity("Jaipur");
+        newStation.setState("Rajasthan");
+        newStation.setOpeningTime("06:00");
+        newStation.setClosingTime("22:00");
+
+        assertThrows(BadRequestException.class, () -> {
+            operatorService.createStation("kunal@testops.com", newStation);
+        });
+
+        // 3. Admin approves operator
+        AuthDTO.OperatorReviewRequest approveReq = new AuthDTO.OperatorReviewRequest("APPROVED", "Verified identity");
+        adminService.reviewOperator(opResp.getId(), approveReq);
+
+        // 4. Approved operator now successfully submits station (starts PENDING admin approval)
+        StationDTO.StationResponse created = operatorService.createStation("kunal@testops.com", newStation);
+        assertNotNull(created.getId());
+        assertEquals("PENDING", created.getApprovalStatus());
+
+        // 5. Driver cannot see pending station in public station search
+        List<StationDTO.StationSummary> publicStations = stationService.getAllActiveStations(null, "Jaipur", null);
+        assertTrue(publicStations.isEmpty());
+
+        // 6. Admin approves station
+        AuthDTO.StationReviewRequest approveStationReq = new AuthDTO.StationReviewRequest("APPROVED", "Site inspected");
+        adminService.reviewStation(created.getId(), approveStationReq);
+
+        // 7. Driver now sees approved station
+        List<StationDTO.StationSummary> publicAfterApproval = stationService.getAllActiveStations(null, "Jaipur", null);
+        assertEquals(1, publicAfterApproval.size());
+        assertEquals("Kunal Hub Jaipur", publicAfterApproval.get(0).getName());
+    }
+
+    @Test
+    @DisplayName("Test 12: Admin Self-Registration Prevention")
+    void testAdminSelfRegistrationForbidden() {
+        AuthDTO.RegisterRequest req = new AuthDTO.RegisterRequest(
+                "Fake Admin", "fakeadmin@hacker.com", "Hacked@123", "9876543200", "ADMIN");
+
+        assertThrows(BadRequestException.class, () -> {
+            authService.register(req);
         });
     }
 }

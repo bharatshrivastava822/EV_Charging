@@ -23,6 +23,14 @@ import AdminStations from './pages/admin/AdminStations';
 import AdminBookings from './pages/admin/AdminBookings';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminSlots from './pages/admin/AdminSlots';
+import AdminApprovals from './pages/admin/AdminApprovals';
+
+import OperatorLayout from './layouts/OperatorLayout';
+import OperatorDashboard from './pages/operator/OperatorDashboard';
+import OperatorStations from './pages/operator/OperatorStations';
+import OperatorSlots from './pages/operator/OperatorSlots';
+import OperatorBookings from './pages/operator/OperatorBookings';
+import OperatorStatus from './pages/operator/OperatorStatus';
 
 function UserLayout({ children }) {
   return (
@@ -49,7 +57,7 @@ export default function App() {
             <Route path="/login" element={<UserLayout><PublicRoute><Login /></PublicRoute></UserLayout>} />
             <Route path="/register" element={<UserLayout><PublicRoute><Register /></PublicRoute></UserLayout>} />
 
-            {/* Protected user routes */}
+            {/* Protected driver routes */}
             <Route path="/dashboard" element={<UserLayout><ProtectedRoute><Dashboard /></ProtectedRoute></UserLayout>} />
             <Route path="/bookings" element={<UserLayout><ProtectedRoute><MyBookings /></ProtectedRoute></UserLayout>} />
             <Route path="/history" element={<UserLayout><ProtectedRoute><ChargingHistory /></ProtectedRoute></UserLayout>} />
@@ -57,9 +65,19 @@ export default function App() {
             <Route path="/booking-confirmation/:id" element={<UserLayout><ProtectedRoute><BookingConfirmation /></ProtectedRoute></UserLayout>} />
             <Route path="/profile" element={<UserLayout><ProtectedRoute><Profile /></ProtectedRoute></UserLayout>} />
 
+            {/* Station Operator routes */}
+            <Route path="/operator/status" element={<ProtectedRoute operatorOnly><UserLayout><OperatorStatus /></UserLayout></ProtectedRoute>} />
+            <Route path="/operator" element={<ProtectedRoute operatorOnly requireApprovedOperator><OperatorLayout /></ProtectedRoute>}>
+              <Route index element={<OperatorDashboard />} />
+              <Route path="stations" element={<OperatorStations />} />
+              <Route path="slots" element={<OperatorSlots />} />
+              <Route path="bookings" element={<OperatorBookings />} />
+            </Route>
+
             {/* Admin enterprise routes */}
             <Route path="/admin" element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
               <Route index element={<AdminDashboard />} />
+              <Route path="approvals" element={<AdminApprovals />} />
               <Route path="stations" element={<AdminStations />} />
               <Route path="bookings" element={<AdminBookings />} />
               <Route path="users" element={<AdminUsers />} />

@@ -17,7 +17,8 @@ export const authService = {
           id: response.data.id,
           name: response.data.name,
           email: response.data.email,
-          role: response.data.role
+          role: response.data.role,
+          operatorStatus: response.data.operatorStatus || 'NONE'
         };
         localStorage.setItem('user', JSON.stringify(userObj));
         return userObj;
@@ -31,20 +32,22 @@ export const authService = {
 
   /**
    * Register a new user account with Spring Boot backend
-   * @param {{ name: string, email: string, phone: string, password: string }} userData
+   * @param {{ name: string, email: string, phone: string, password: string, role?: string }} userData
    */
   register: async (userData) => {
     const email = userData.email.trim().toLowerCase();
     const name = userData.name.trim();
     const phone = userData.phone ? userData.phone.trim() : '';
     const password = userData.password;
+    const role = userData.role || 'DRIVER';
 
     try {
       const response = await api.post('/auth/register', {
         name,
         email,
         phone,
-        password
+        password,
+        role
       });
 
       if (response.data) {

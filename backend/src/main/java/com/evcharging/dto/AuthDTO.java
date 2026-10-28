@@ -24,6 +24,16 @@ public class AuthDTO {
 
         @Size(max = 15, message = "Phone number is too long")
         private String phone;
+
+        private String role; // DRIVER or STATION_OPERATOR (ADMIN not allowed in public signup)
+
+        public RegisterRequest(String name, String email, String password, String phone) {
+            this.name = name;
+            this.email = email;
+            this.password = password;
+            this.phone = phone;
+            this.role = "DRIVER";
+        }
     }
 
     @Getter @Setter
@@ -48,6 +58,7 @@ public class AuthDTO {
         private String name;
         private String email;
         private String role;
+        private String operatorStatus;
     }
 
     @Getter @Setter
@@ -59,6 +70,21 @@ public class AuthDTO {
         private String email;
         private String phone;
         private String role;
+        private String operatorStatus;
         private String createdAt;
+    }
+
+    @Getter @Setter
+    @NoArgsConstructor @AllArgsConstructor
+    public static class OperatorReviewRequest {
+        private String status; // APPROVED or REJECTED
+        private String reason;
+    }
+
+    @Getter @Setter
+    @NoArgsConstructor @AllArgsConstructor
+    public static class StationReviewRequest {
+        private String status; // APPROVED or REJECTED
+        private String comments;
     }
 }

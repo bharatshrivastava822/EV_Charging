@@ -30,12 +30,29 @@ public class AuthService {
             throw new BadRequestException("An account with this email address already exists.");
         }
 
+        User.Role assignedRole = User.Role.DRIVER;
+        User.OperatorStatus operatorStatus = User.OperatorStatus.NONE;
+
+        if (request.getRole() != null && !request.getRole().trim().isEmpty()) {
+            String requested = request.getRole().trim().toUpperCase();
+            if ("ADMIN".equals(requested)) {
+                throw new BadRequestException("Administrator registration is not permitted via public registration.");
+            } else if ("STATION_OPERATOR".equals(requested) || "OPERATOR".equals(requested)) {
+                assignedRole = User.Role.STATION_OPERATOR;
+                operatorStatus = User.OperatorStatus.PENDING;
+            } else if ("DRIVER".equals(requested) || "USER".equals(requested)) {
+                assignedRole = User.Role.DRIVER;
+                operatorStatus = User.OperatorStatus.NONE;
+            }
+        }
+
         User user = User.builder()
                 .name(request.getName().trim())
                 .email(request.getEmail().trim().toLowerCase())
                 .phone(request.getPhone() != null ? request.getPhone().trim() : null)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(User.Role.USER)
+                .role(assignedRole)
+                .operatorStatus(operatorStatus)
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -49,6 +66,7 @@ public class AuthService {
                 .name(savedUser.getName())
                 .email(savedUser.getEmail())
                 .role(savedUser.getRole().name())
+                .operatorStatus(savedUser.getOperatorStatus().name())
                 .build();
     }
 
@@ -73,6 +91,7 @@ public class AuthService {
                 .name(user.getName())
                 .email(user.getEmail())
                 .role(user.getRole().name())
+                .operatorStatus(user.getOperatorStatus() != null ? user.getOperatorStatus().name() : User.OperatorStatus.NONE.name())
                 .build();
     }
 
@@ -86,6 +105,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .role(user.getRole().name())
+                .operatorStatus(user.getOperatorStatus() != null ? user.getOperatorStatus().name() : User.OperatorStatus.NONE.name())
                 .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)
                 .build();
     }

@@ -20,7 +20,7 @@ import {
 import './Navbar.css';
 
 export default function Navbar() {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, isOperator, isApprovedOperator, isPendingOperator, isDriver } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -33,6 +33,14 @@ export default function Navbar() {
   };
 
   const closeMobile = () => setMobileOpen(false);
+
+  const getRoleBadgeLabel = () => {
+    if (isAdmin()) return 'Admin Console';
+    if (isOperator()) {
+      return isApprovedOperator() ? 'Operator Portal' : 'Operator (Pending)';
+    }
+    return 'Driver Mode';
+  };
 
   return (
     <header className="header-master-wrapper">
@@ -84,7 +92,7 @@ export default function Navbar() {
               <>
                 <span className="role-badge-pill">
                   <ShieldCheck size={13} color="var(--primary)" />
-                  {isAdmin() ? 'Operator Mode' : 'Driver Mode'}
+                  {getRoleBadgeLabel()}
                 </span>
 
                 {/* User Dropdown */}
@@ -106,12 +114,13 @@ export default function Navbar() {
                       <div className="dropdown-user-info">
                         <div className="dropdown-user-name">{user.name}</div>
                         <div className="dropdown-user-email">{user.email}</div>
-                        <span className={`badge badge-${isAdmin() ? 'warning' : 'available'}`} style={{ marginTop: '0.35rem', fontSize: '0.7rem' }}>
-                          ● {user.role === 'ADMIN' ? 'Administrator' : 'EV Driver'}
+                        <span className={`badge badge-${isAdmin() ? 'warning' : isOperator() ? 'secondary' : 'available'}`} style={{ marginTop: '0.35rem', fontSize: '0.7rem' }}>
+                          ● {isAdmin() ? 'Administrator' : isOperator() ? (isApprovedOperator() ? 'Station Operator' : 'Operator (Pending)') : 'EV Driver'}
                         </span>
                       </div>
 
-                      {!isAdmin() && (
+                      {/* Driver Actions */}
+                      {(!user.role || user.role === 'DRIVER' || user.role === 'USER') && (
                         <>
                           <Link to="/dashboard" className="dropdown-action-btn" onClick={() => setUserMenuOpen(false)}>
                             <Zap size={14} color="var(--primary)" /> Driver Dashboard
@@ -125,10 +134,39 @@ export default function Navbar() {
                         </>
                       )}
 
+                      {/* Operator Actions */}
+                      {isOperator() && (
+                        <>
+                          {isApprovedOperator() ? (
+                            <>
+                              <Link to="/operator" className="dropdown-action-btn" onClick={() => setUserMenuOpen(false)}>
+                                <Zap size={14} color="var(--primary)" /> Operator Dashboard
+                              </Link>
+                              <Link to="/operator/stations" className="dropdown-action-btn" onClick={() => setUserMenuOpen(false)}>
+                                <MapPin size={14} /> My Stations
+                              </Link>
+                              <Link to="/operator/slots" className="dropdown-action-btn" onClick={() => setUserMenuOpen(false)}>
+                                <Calendar size={14} /> Manage Slots
+                              </Link>
+                            </>
+                          ) : (
+                            <Link to="/operator/status" className="dropdown-action-btn" onClick={() => setUserMenuOpen(false)}>
+                              <ShieldCheck size={14} color="#FBBF24" /> Application Status
+                            </Link>
+                          )}
+                        </>
+                      )}
+
+                      {/* Admin Actions */}
                       {isAdmin() && (
-                        <Link to="/admin" className="dropdown-action-btn" onClick={() => setUserMenuOpen(false)}>
-                          <Settings size={14} color="var(--primary)" /> Admin Console
-                        </Link>
+                        <>
+                          <Link to="/admin" className="dropdown-action-btn" onClick={() => setUserMenuOpen(false)}>
+                            <Settings size={14} color="var(--primary)" /> Admin Console
+                          </Link>
+                          <Link to="/admin/approvals" className="dropdown-action-btn" onClick={() => setUserMenuOpen(false)}>
+                            <ShieldCheck size={14} /> Operator Approvals
+                          </Link>
+                        </>
                       )}
 
                       <button className="dropdown-action-btn danger" onClick={handleLogout}>
@@ -161,7 +199,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* 3. PRIMARY HORIZONTAL NAVIGATION (Reference 2 style) */}
+      {/* 3. PRIMARY HORIZONTAL NAVIGATION */}
       <nav className="primary-horizontal-nav">
         <div className="horizontal-nav-inner">
           <div className={`nav-links-list ${mobileOpen ? 'open' : ''}`}>
@@ -182,7 +220,8 @@ export default function Navbar() {
               FIND CHARGERS
             </NavLink>
 
-            {user && !isAdmin() && (
+            {/* Driver Links */}
+            {user && (!user.role || user.role === 'DRIVER' || user.role === 'USER') && (
               <>
                 <NavLink to="/dashboard" className={({ isActive }) => (isActive ? 'nav-tab-item active' : 'nav-tab-item')} onClick={closeMobile}>
                   DASHBOARD
@@ -199,10 +238,40 @@ export default function Navbar() {
               </>
             )}
 
+            {/* Operator Links */}
+            {user && isOperator() && (
+              <>
+                {isApprovedOperator() ? (
+                  <>
+                    <NavLink to="/operator" className={({ isActive }) => (isActive ? 'nav-tab-item active' : 'nav-tab-item')} onClick={closeMobile} end>
+                      OPERATOR HUB
+                    </NavLink>
+                    <NavLink to="/operator/stations" className={({ isActive }) => (isActive ? 'nav-tab-item active' : 'nav-tab-item')} onClick={closeMobile}>
+                      MY STATIONS
+                    </NavLink>
+                    <NavLink to="/operator/slots" className={({ isActive }) => (isActive ? 'nav-tab-item active' : 'nav-tab-item')} onClick={closeMobile}>
+                      SLOT MANAGER
+                    </NavLink>
+                    <NavLink to="/operator/bookings" className={({ isActive }) => (isActive ? 'nav-tab-item active' : 'nav-tab-item')} onClick={closeMobile}>
+                      RESERVATIONS
+                    </NavLink>
+                  </>
+                ) : (
+                  <NavLink to="/operator/status" className={({ isActive }) => (isActive ? 'nav-tab-item active' : 'nav-tab-item')} onClick={closeMobile}>
+                    APPLICATION STATUS
+                  </NavLink>
+                )}
+              </>
+            )}
+
+            {/* Admin Links */}
             {isAdmin() && (
               <>
                 <NavLink to="/admin" className={({ isActive }) => (isActive ? 'nav-tab-item active admin-console-link' : 'nav-tab-item admin-console-link')} onClick={closeMobile} end>
                   ADMIN DASHBOARD
+                </NavLink>
+                <NavLink to="/admin/approvals" className={({ isActive }) => (isActive ? 'nav-tab-item active' : 'nav-tab-item')} onClick={closeMobile}>
+                  APPROVALS
                 </NavLink>
                 <NavLink to="/admin/stations" className={({ isActive }) => (isActive ? 'nav-tab-item active' : 'nav-tab-item')} onClick={closeMobile}>
                   STATIONS

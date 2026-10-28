@@ -23,6 +23,9 @@ public class StationDTO {
         private String openingTime;
         private String closingTime;
         private String status;
+        private String approvalStatus;
+        private Long ownerId;
+        private String ownerName;
         private String imageUrl;
         private int totalChargers;
         private int activeChargers;
@@ -42,6 +45,9 @@ public class StationDTO {
         private String openingTime;
         private String closingTime;
         private String status;
+        private String approvalStatus;
+        private Long ownerId;
+        private String ownerName;
         private int totalChargers;
         private int availableChargers;
         private List<String> chargerTypes;

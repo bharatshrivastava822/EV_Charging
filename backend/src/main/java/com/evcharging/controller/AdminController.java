@@ -38,4 +38,32 @@ public class AdminController {
         List<AuthDTO.UserResponse> users = adminService.getAllUsers();
         return ResponseEntity.ok(users);
     }
+
+    @GetMapping("/operators/pending")
+    public ResponseEntity<List<AuthDTO.UserResponse>> getPendingOperators() {
+        List<AuthDTO.UserResponse> pending = adminService.getPendingOperators();
+        return ResponseEntity.ok(pending);
+    }
+
+    @PostMapping("/operators/{id}/review")
+    public ResponseEntity<AuthDTO.UserResponse> reviewOperator(
+            @PathVariable Long id,
+            @RequestBody AuthDTO.OperatorReviewRequest request) {
+        AuthDTO.UserResponse response = adminService.reviewOperator(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/stations/pending")
+    public ResponseEntity<List<com.evcharging.dto.StationDTO.StationResponse>> getPendingStations() {
+        List<com.evcharging.dto.StationDTO.StationResponse> stations = adminService.getPendingStations();
+        return ResponseEntity.ok(stations);
+    }
+
+    @PostMapping("/stations/{id}/review")
+    public ResponseEntity<com.evcharging.dto.StationDTO.StationResponse> reviewStation(
+            @PathVariable Long id,
+            @RequestBody AuthDTO.StationReviewRequest request) {
+        com.evcharging.dto.StationDTO.StationResponse response = adminService.reviewStation(id, request);
+        return ResponseEntity.ok(response);
+    }
 }

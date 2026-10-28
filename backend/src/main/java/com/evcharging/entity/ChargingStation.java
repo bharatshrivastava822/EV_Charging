@@ -50,6 +50,15 @@ public class ChargingStation {
     @Builder.Default
     private StationStatus status = StationStatus.ACTIVE;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_status", nullable = false)
+    @Builder.Default
+    private ApprovalStatus approvalStatus = ApprovalStatus.APPROVED;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
+    private User owner;
+
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
@@ -67,5 +76,9 @@ public class ChargingStation {
 
     public enum StationStatus {
         ACTIVE, INACTIVE, MAINTENANCE
+    }
+
+    public enum ApprovalStatus {
+        PENDING, APPROVED, REJECTED
     }
 }

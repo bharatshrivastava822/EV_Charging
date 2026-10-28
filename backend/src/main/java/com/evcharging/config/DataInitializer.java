@@ -41,15 +41,37 @@ public class DataInitializer implements CommandLineRunner {
                 .phone("9876543210")
                 .passwordHash(passwordEncoder.encode("Admin@123"))
                 .role(User.Role.ADMIN)
+                .operatorStatus(User.OperatorStatus.NONE)
                 .build();
-        userRepository.save(admin);
+        admin = userRepository.save(admin);
+
+        User operatorApproved = User.builder()
+                .name("Vikram Malhotra (Station Partner)")
+                .email("operator@evcharge.in")
+                .phone("9876543220")
+                .passwordHash(passwordEncoder.encode("Operator@123"))
+                .role(User.Role.STATION_OPERATOR)
+                .operatorStatus(User.OperatorStatus.APPROVED)
+                .build();
+        operatorApproved = userRepository.save(operatorApproved);
+
+        User operatorPending = User.builder()
+                .name("Rahul Verma (New Partner)")
+                .email("pending.operator@evcharge.in")
+                .phone("9876543221")
+                .passwordHash(passwordEncoder.encode("Operator@123"))
+                .role(User.Role.STATION_OPERATOR)
+                .operatorStatus(User.OperatorStatus.PENDING)
+                .build();
+        operatorPending = userRepository.save(operatorPending);
 
         User aryan = User.builder()
                 .name("Aryan Sharma")
                 .email("aryan@example.com")
                 .phone("9876543211")
                 .passwordHash(passwordEncoder.encode("User@123"))
-                .role(User.Role.USER)
+                .role(User.Role.DRIVER)
+                .operatorStatus(User.OperatorStatus.NONE)
                 .build();
         userRepository.save(aryan);
 
@@ -58,7 +80,8 @@ public class DataInitializer implements CommandLineRunner {
                 .email("priya@example.com")
                 .phone("9876543212")
                 .passwordHash(passwordEncoder.encode("User@123"))
-                .role(User.Role.USER)
+                .role(User.Role.DRIVER)
+                .operatorStatus(User.OperatorStatus.NONE)
                 .build();
         userRepository.save(priya);
 
@@ -74,6 +97,8 @@ public class DataInitializer implements CommandLineRunner {
                 .openingTime(LocalTime.of(6, 0))
                 .closingTime(LocalTime.of(23, 0))
                 .status(ChargingStation.StationStatus.ACTIVE)
+                .approvalStatus(ChargingStation.ApprovalStatus.APPROVED)
+                .owner(operatorApproved)
                 .build();
         s1 = stationRepository.save(s1);
 
@@ -88,6 +113,8 @@ public class DataInitializer implements CommandLineRunner {
                 .openingTime(LocalTime.of(0, 0))
                 .closingTime(LocalTime.of(23, 59))
                 .status(ChargingStation.StationStatus.ACTIVE)
+                .approvalStatus(ChargingStation.ApprovalStatus.APPROVED)
+                .owner(operatorApproved)
                 .build();
         s2 = stationRepository.save(s2);
 
@@ -102,6 +129,8 @@ public class DataInitializer implements CommandLineRunner {
                 .openingTime(LocalTime.of(7, 0))
                 .closingTime(LocalTime.of(22, 0))
                 .status(ChargingStation.StationStatus.ACTIVE)
+                .approvalStatus(ChargingStation.ApprovalStatus.APPROVED)
+                .owner(admin)
                 .build();
         s3 = stationRepository.save(s3);
 
@@ -116,6 +145,8 @@ public class DataInitializer implements CommandLineRunner {
                 .openingTime(LocalTime.of(5, 0))
                 .closingTime(LocalTime.of(23, 0))
                 .status(ChargingStation.StationStatus.ACTIVE)
+                .approvalStatus(ChargingStation.ApprovalStatus.APPROVED)
+                .owner(admin)
                 .build();
         s4 = stationRepository.save(s4);
 
@@ -130,6 +161,8 @@ public class DataInitializer implements CommandLineRunner {
                 .openingTime(LocalTime.of(6, 0))
                 .closingTime(LocalTime.of(23, 0))
                 .status(ChargingStation.StationStatus.ACTIVE)
+                .approvalStatus(ChargingStation.ApprovalStatus.APPROVED)
+                .owner(admin)
                 .build();
         s5 = stationRepository.save(s5);
 

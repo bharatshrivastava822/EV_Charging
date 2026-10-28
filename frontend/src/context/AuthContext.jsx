@@ -18,7 +18,13 @@ export function AuthProvider({ children }) {
 
   const login = async (credentials) => {
     const data = await authService.login(credentials);
-    const userObj = { id: data.id, name: data.name, email: data.email, role: data.role };
+    const userObj = {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      operatorStatus: data.operatorStatus || 'NONE'
+    };
     setUser(userObj);
     return userObj;
   };
@@ -33,10 +39,28 @@ export function AuthProvider({ children }) {
   };
 
   const isAdmin = () => user?.role === 'ADMIN';
+  const isOperator = () => user?.role === 'STATION_OPERATOR';
+  const isApprovedOperator = () => user?.role === 'STATION_OPERATOR' && user?.operatorStatus === 'APPROVED';
+  const isPendingOperator = () => user?.role === 'STATION_OPERATOR' && user?.operatorStatus === 'PENDING';
+  const isDriver = () => !user || user?.role === 'DRIVER' || user?.role === 'USER';
   const isAuthenticated = () => !!user;
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin, isAuthenticated }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        logout,
+        isAdmin,
+        isOperator,
+        isApprovedOperator,
+        isPendingOperator,
+        isDriver,
+        isAuthenticated
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
