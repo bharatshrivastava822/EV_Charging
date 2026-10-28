@@ -216,4 +216,63 @@ class EvChargingApplicationTests {
         assertNotNull(created.getId());
         assertEquals("Admin Created Station", created.getName());
     }
+
+    @Test
+    @DisplayName("Test 9: Past Slot Booking Rejected")
+    void testPastSlotBookingRejected() {
+        AuthDTO.RegisterRequest regReq = new AuthDTO.RegisterRequest("Rohan", "rohan@test.com", "Rohan@123", "9876500002");
+        authService.register(regReq);
+
+        // Create a slot in the past (yesterday)
+        Slot pastSlot = Slot.builder()
+                .charger(testCharger)
+                .slotDate(LocalDate.now().minusDays(1))
+                .startTime(LocalTime.of(10, 0))
+                .endTime(LocalTime.of(10, 30))
+                .status(Slot.SlotStatus.AVAILABLE)
+                .build();
+        pastSlot = slotRepository.save(pastSlot);
+
+        BookingDTO.BookingRequest bookReq = new BookingDTO.BookingRequest(
+                testStation.getId(),
+                testCharger.getId(),
+                pastSlot.getId()
+        );
+
+        assertThrows(BadRequestException.class, () -> {
+            bookingService.createBooking(bookReq, "rohan@test.com");
+        });
+    }
+
+    @Test
+    @DisplayName("Test 10: Booking Reference Access Control")
+    void testBookingReferenceAccessControl() {
+        AuthDTO.RegisterRequest userAReq = new AuthDTO.RegisterRequest("User A", "usera@test.com", "UserA@123", "9876500003");
+        authService.register(userAReq);
+
+        AuthDTO.RegisterRequest userBReq = new AuthDTO.RegisterRequest("User B", "userb@test.com", "UserB@123", "9876500004");
+        authService.register(userBReq);
+
+        BookingDTO.BookingRequest bookReq = new BookingDTO.BookingRequest(
+                testStation.getId(),
+                testCharger.getId(),
+                testSlot.getId()
+        );
+
+        BookingDTO.BookingResponse booking = bookingService.createBooking(bookReq, "usera@test.com");
+        String ref = booking.getBookingReference();
+
+        // 1. Owner can access
+        BookingDTO.BookingResponse ownerView = bookingService.getBookingByReference(ref, "usera@test.com", false);
+        assertEquals(booking.getId(), ownerView.getId());
+
+        // 2. Admin can access
+        BookingDTO.BookingResponse adminView = bookingService.getBookingByReference(ref, "admin@test.com", true);
+        assertEquals(booking.getId(), adminView.getId());
+
+        // 3. Unauthorized user cannot access
+        assertThrows(BadRequestException.class, () -> {
+            bookingService.getBookingByReference(ref, "userb@test.com", false);
+        });
+    }
 }

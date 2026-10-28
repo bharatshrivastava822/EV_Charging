@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
@@ -78,8 +79,9 @@ public class BookingService {
 
         // 7. Verify slot date/time is valid (not in the past)
         LocalDate today = LocalDate.now();
-        if (slot.getSlotDate().isBefore(today)) {
-            throw new BadRequestException("Cannot book a slot for a past date.");
+        LocalTime now = LocalTime.now();
+        if (slot.getSlotDate().isBefore(today) || (slot.getSlotDate().isEqual(today) && slot.getStartTime().isBefore(now))) {
+            throw new BadRequestException("Cannot book a time slot in the past.");
         }
 
         // 8. Prevent duplicate booking of same slot
@@ -177,9 +179,13 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public BookingDTO.BookingResponse getBookingByReference(String reference) {
+    public BookingDTO.BookingResponse getBookingByReference(String reference, String userEmail, boolean isAdmin) {
         Booking booking = bookingRepository.findByBookingReference(reference)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found with reference: " + reference));
+
+        if (!isAdmin && !booking.getUser().getEmail().equalsIgnoreCase(userEmail)) {
+            throw new BadRequestException("You do not have permission to view this booking.");
+        }
 
         return mapToResponse(booking);
     }

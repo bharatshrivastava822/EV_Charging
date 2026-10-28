@@ -1,8 +1,15 @@
 import axios from 'axios';
 
-// Resolve base URL from environment or fallback to relative '/api' for local Vite proxy
-const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
-const baseURL = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
+// Resolve and normalize base URL from environment (defaulting to relative '/api' for Vite dev proxy)
+let rawBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').trim();
+if (rawBaseUrl.endsWith('/')) {
+  rawBaseUrl = rawBaseUrl.slice(0, -1);
+}
+// Automatically ensure '/api' namespace exists for absolute origins (e.g. https://api.com -> https://api.com/api)
+if (rawBaseUrl.startsWith('http') && !rawBaseUrl.endsWith('/api') && !rawBaseUrl.includes('/api/')) {
+  rawBaseUrl = `${rawBaseUrl}/api`;
+}
+const baseURL = rawBaseUrl;
 
 const api = axios.create({
   baseURL,

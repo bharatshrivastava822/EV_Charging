@@ -48,8 +48,12 @@ public class BookingController {
     }
 
     @GetMapping("/ref/{reference}")
-    public ResponseEntity<BookingDTO.BookingResponse> getBookingByReference(@PathVariable String reference) {
-        BookingDTO.BookingResponse booking = bookingService.getBookingByReference(reference);
+    public ResponseEntity<BookingDTO.BookingResponse> getBookingByReference(
+            @PathVariable String reference,
+            Authentication authentication) {
+        String email = authentication.getName();
+        boolean isAdmin = isAdmin(authentication);
+        BookingDTO.BookingResponse booking = bookingService.getBookingByReference(reference, email, isAdmin);
         return ResponseEntity.ok(booking);
     }
 

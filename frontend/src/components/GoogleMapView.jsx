@@ -454,6 +454,9 @@ export default function GoogleMapView({
         <span className="live-status-title">ChargerGo Live GPS Grid</span>
         <span className="live-count-divider">•</span>
         <span className="live-station-count">{stations.length} Active Stations</span>
+        <span className="map-provider-tag">
+          {mapEngine === 'google' ? 'Google Maps' : 'Satellite Imagery'}
+        </span>
 
         {/* Compact Satellite | Roadmap Switcher */}
         <div className="map-view-toggle-pill">
@@ -547,6 +550,17 @@ export default function GoogleMapView({
         .live-station-count {
           color: #9CA3AF;
           font-size: 0.8rem;
+        }
+
+        .map-provider-tag {
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          color: #9CA3AF;
+          padding: 2px 7px;
+          border-radius: 10px;
+          font-size: 0.65rem;
+          font-weight: 600;
+          letter-spacing: 0.3px;
         }
 
         /* Compact Satellite | Roadmap Toggle Pill */
