@@ -35,6 +35,7 @@ public class Charger {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private ChargerStatus status = ChargerStatus.ACTIVE;
 
     @OneToMany(mappedBy = "charger", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

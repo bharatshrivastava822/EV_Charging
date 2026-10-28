@@ -31,6 +31,7 @@ public class Slot {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private SlotStatus status = SlotStatus.AVAILABLE;
 
     public enum SlotStatus {

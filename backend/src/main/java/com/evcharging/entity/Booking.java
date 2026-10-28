@@ -47,6 +47,7 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private BookingStatus status = BookingStatus.CONFIRMED;
 
     @Column(name = "created_at", updatable = false)

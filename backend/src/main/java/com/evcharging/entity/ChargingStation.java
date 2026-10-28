@@ -47,6 +47,7 @@ public class ChargingStation {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private StationStatus status = StationStatus.ACTIVE;
 
     @Column(name = "image_url", length = 500)
