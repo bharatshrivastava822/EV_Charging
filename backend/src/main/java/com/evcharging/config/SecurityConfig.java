@@ -63,8 +63,8 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Health check endpoints for Render and cloud load balancers
-                .requestMatchers("/health", "/api/health").permitAll()
+                // Root and health check endpoints
+                .requestMatchers("/", "/health", "/api/health").permitAll()
                 // Public auth endpoints
                 .requestMatchers("/api/auth/**").permitAll()
                 // Public station browsing & availability
