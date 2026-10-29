@@ -66,3 +66,4 @@ export const featureService = {
     return response.data;
   }
 };
+

@@ -43,6 +43,8 @@ public class StationDTO {
         private String address;
         private String city;
         private String state;
+        private Double latitude;
+        private Double longitude;
         private String operator;
         private String openingTime;
         private String closingTime;

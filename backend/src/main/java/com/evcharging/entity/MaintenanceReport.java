@@ -62,3 +62,4 @@ public class MaintenanceReport {
         OPEN, IN_PROGRESS, RESOLVED, CLOSED
     }
 }
+

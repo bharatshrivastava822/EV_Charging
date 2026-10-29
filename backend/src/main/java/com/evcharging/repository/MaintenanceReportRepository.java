@@ -19,3 +19,4 @@ public interface MaintenanceReportRepository extends JpaRepository<MaintenanceRe
     @Query("SELECT COUNT(m) FROM MaintenanceReport m WHERE m.station.owner.id = :ownerId AND m.status = 'OPEN'")
     long countOpenByOwnerId(@Param("ownerId") Long ownerId);
 }
+

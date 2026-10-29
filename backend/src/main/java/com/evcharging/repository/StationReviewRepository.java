@@ -14,3 +14,4 @@ public interface StationReviewRepository extends JpaRepository<StationReview, Lo
 
     long countByStationId(Long stationId);
 }
+

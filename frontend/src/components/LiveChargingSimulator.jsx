@@ -207,3 +207,4 @@ export default function LiveChargingSimulator({ bookingId, stationName, chargerN
     </div>
   );
 }
+

@@ -39,6 +39,10 @@ const SATELLITE_TILES = {
   roadmap: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'
 };
 
+function hasValidCoords(station) {
+  return Number.isFinite(station?.latitude) && Number.isFinite(station?.longitude);
+}
+
 export default function GoogleMapView({
   stations = [],
   selectedStation = null,
@@ -222,11 +226,13 @@ export default function GoogleMapView({
       routeLayerRef.current.forEach(r => r.setMap(null));
       routeLayerRef.current = [];
 
-      if (stations.length === 0) return;
+      // Only plot stations with valid numeric coordinates so one bad record can't crash the map
+      const mappableStations = stations.filter(hasValidCoords);
+      if (mappableStations.length === 0) return;
 
       const bounds = new window.google.maps.LatLngBounds();
 
-      stations.forEach(station => {
+      mappableStations.forEach(station => {
         const isSelected = selectedStation?.id === station.id;
         const isAvailable = (station.availableChargers || 0) > 0;
         const maxKw = Math.max(...(station.chargers || []).map(c => c.powerKw || 0), 60);
@@ -258,7 +264,7 @@ export default function GoogleMapView({
         bounds.extend({ lat: station.latitude, lng: station.longitude });
       });
 
-      if (selectedStation) {
+      if (selectedStation && hasValidCoords(selectedStation)) {
         const targetLat = selectedStation.latitude;
         const targetLng = selectedStation.longitude;
         const originLat = targetLat - 0.012;
@@ -330,11 +336,13 @@ export default function GoogleMapView({
       routeLayerRef.current.forEach(r => map.removeLayer(r));
       routeLayerRef.current = [];
 
-      if (stations.length === 0) return;
+      // Only plot stations with valid numeric coordinates so one bad record can't crash the map
+      const mappableStations = stations.filter(hasValidCoords);
+      if (mappableStations.length === 0) return;
 
       const group = [];
 
-      stations.forEach(station => {
+      mappableStations.forEach(station => {
         const isSelected = selectedStation?.id === station.id;
         const isAvailable = (station.availableChargers || 0) > 0;
         const maxKw = Math.max(...(station.chargers || []).map(c => c.powerKw || 0), 60);
@@ -367,7 +375,7 @@ export default function GoogleMapView({
         group.push([station.latitude, station.longitude]);
       });
 
-      if (selectedStation) {
+      if (selectedStation && hasValidCoords(selectedStation)) {
         const targetLat = selectedStation.latitude;
         const targetLng = selectedStation.longitude;
         const originLat = targetLat - 0.012;

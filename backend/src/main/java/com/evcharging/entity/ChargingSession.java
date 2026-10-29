@@ -66,3 +66,4 @@ public class ChargingSession {
         IN_PROGRESS, COMPLETED, STOPPED
     }
 }
+

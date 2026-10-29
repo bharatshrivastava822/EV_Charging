@@ -120,3 +120,4 @@ export default function CostEstimatorModal({ isOpen, onClose, initialPrice = 18.
     </div>
   );
 }
+

@@ -172,6 +172,8 @@ public class StationService {
                 .address(station.getAddress())
                 .city(station.getCity())
                 .state(station.getState())
+                .latitude(station.getLatitude())
+                .longitude(station.getLongitude())
                 .operator(station.getOperator())
                 .openingTime(station.getOpeningTime().format(TIME_FORMATTER))
                 .closingTime(station.getClosingTime().format(TIME_FORMATTER))

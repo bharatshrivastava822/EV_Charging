@@ -10,3 +10,4 @@ public interface ChargingSessionRepository extends JpaRepository<ChargingSession
     List<ChargingSession> findByUserIdOrderByStartTimeDesc(Long userId);
     boolean existsByBookingId(Long bookingId);
 }
+
