@@ -21,8 +21,11 @@ RUN mvn clean package -DskipTests -B
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
-# Non-root container user for security
-RUN groupadd -r chargergo && useradd -r -g chargergo chargergo
+# Ensure non-root container user owns /app and /app/data
+RUN groupadd -r chargergo && useradd -r -g chargergo -d /app chargergo \
+    && mkdir -p /app/data \
+    && chown -R chargergo:chargergo /app
+
 USER chargergo:chargergo
 
 # Copy artifact from build stage
@@ -37,3 +40,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=45s --retries=3 \
   CMD curl -f http://localhost:${PORT:-8080}/api/health || exit 1
 
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-Dserver.port=${PORT}", "-jar", "app.jar"]
+

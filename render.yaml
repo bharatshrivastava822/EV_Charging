@@ -21,3 +21,4 @@ services:
         sync: false
       - key: APP_CORS_ALLOWED_ORIGINS
         value: https://ev-charging-peach-one.vercel.app,http://localhost:5173
+
