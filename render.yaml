@@ -1,0 +1,23 @@
+# Render Blueprint specification for ChargerGo Backend
+services:
+  - type: web
+    name: EV_Charging
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    region: oregon
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: APP_JWT_SECRET
+        sync: false
+      - key: APP_CORS_ALLOWED_ORIGINS
+        value: https://ev-charging-peach-one.vercel.app,http://localhost:5173
